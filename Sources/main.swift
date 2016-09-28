@@ -3,36 +3,21 @@ import Alembic
 
 final class User: InitDistillable {
     let name: String
-    let birthday: Date
-    let job: String?
+    let age: Int
 
     init(json j: JSON) throws {
-        name = try j.distil("name")
-        birthday = try j.distil("birthday", to: String.self)
-            .flatMap { date -> Date? in
-                let fmt = DateFormatter()
-                fmt.dateFormat = "M/d/yyyy"
-                return fmt.date(from: date)
-            }
-        job = try j.option("job")
+        name = try j <| "name"
+        age = try j <| "age"
     }
 }
 
-let object = [
-    "user": [
-        "name": "Robert",
-        "birthday": "4/4/1965",
-        "job": NSNull()
-    ]
-]
+let j = JSON(["user": ["name": "Robert", "age": 51]])
 
-let j = JSON(object)
-
-let name: String = try! j <| ["user", "name"]
+let name: String = try! j.distil(["user", "name"]).map { "Mr." + $0  }
 print(name)
 
-let job: String? = try! j <|? ["user", "job"]
-print(job)
+let age: Int = try! j.distil(["user", "age"]).filter { $0 >= 0 }
+print(age)
 
 let user: User = try! j <| "user"
-print("Name: \(user.name), Birthday: \(user.birthday), Job: \(user.job ?? "Unknown")")
+print("Name: \(user.name), Age: \(user.age)")

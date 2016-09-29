@@ -19,5 +19,5 @@ print(name)
 let age: Int = try! j.distil(["user", "age"]).filter { $0 >= 0 }
 print(age)
 
-let user: User = try! j <| "user"
+let user: User = try! j.distil("user")
 print("Name: \(user.name), Age: \(user.age)")

@@ -1,39 +1,37 @@
-import Foundation
 import Alembic
 
-struct User: Distillable {
+struct Person: Parsable {
     let name: String
     let age: Int
-    
-    static func distil(json j: JSON) throws -> User {
-        return try User(name: j <| "name", age: j <| "age")
+
+    static func value(from json: JSON) throws -> Person {
+        return try .init(
+            name: json.value(for: "name"),
+            age: json.value(for: "age")
+        )
     }
 }
 
-let object = [
-    "users": [
+let json: JSON = [
+    "persons": [
         ["name": "Robert", "age": 51],
         ["name": "Tony", "age": 43]
     ]
 ]
 
 do {
-    
-    let j = JSON(object)
-    
-    let name: String = try j.distil(["users", 0, "name"])
-        .map { "Mr." + $0  }
+    let name: String = try json.value(for: ["persons", 0, "name"])
     print(name)
-    
-    let age: Int = try j.distil(["users", 0, "age"])
+
+    let age: Int = try json.parse(for: ["persons", 0, "age"])
         .filter { $0 >= 0 }
+        .value()
     print(age)
-    
-    let users: [User] = try j.distil("users")
-    print(users)
-    
+
+    let persons: [Person] = try json.value(for: "persons")
+    print(persons)
+
 } catch let error {
-    
+
     print("Failed to parse JSON: \(error)")
-    
 }
